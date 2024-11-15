@@ -7,6 +7,7 @@ from .serializers import GoatSerializer
 
 class GoatsListView(APIView):
     def get(self, request):
+        print(request)
         goats = Goats.objects.all()
         serializer = GoatSerializer(goats, many=True)
         return Response(serializer.data)
