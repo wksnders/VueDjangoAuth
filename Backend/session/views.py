@@ -21,3 +21,34 @@ class SessionDataView(APIView):
             "message": "Data stored successfully",
             "stored_data": request.data
         }, status=status.HTTP_201_CREATED)
+    
+    def put(self, request):
+        updated_data = {}
+        for key, value in request.data.items():
+            request.session[key] = value
+            updated_data[key] = value
+
+        return Response({
+            "message": "Data updated successfully",
+            "updated_data": updated_data
+        }, status=status.HTTP_200_OK)
+    
+    def delete(self, request):
+        key = request.data.get('key')
+
+        if key:
+            if key in request.session:
+                del request.session[key]
+                return Response({
+                    "message": f"'{key}' removed from session"
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    "message": f"'{key}' not found in session"
+                }, status=status.HTTP_404_NOT_FOUND)
+        else:
+            request.session.clear()
+            return Response({
+                "message": "All session data cleared"
+            }, status=status.HTTP_200_OK)
+
