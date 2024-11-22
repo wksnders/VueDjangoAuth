@@ -25,13 +25,11 @@ SECRET_KEY = 'django-insecure-^f+821pkw*m=&%d9^g2m&(jj+e=pbd1t1qk$jgwd*f*0tiw&-4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-
 # Application definition
 
 INSTALLED_APPS = [
     'rest_framework',
+    "corsheaders",
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -46,11 +44,23 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = "User.CustomUser"
+SECURE_SSL_REDIRECT = (not DEBUG)
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny'
+    ],
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -125,9 +135,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+ALLOWED_HOSTS = []
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CORS_ALLOW_CREDENTIALS = True 
+CORS_EXPOSE_HEADERS = ['X-CSRFToken']
+
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOWED_ORIGINS = ["http://localhost:5173",]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+]
