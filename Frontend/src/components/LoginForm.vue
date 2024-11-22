@@ -1,31 +1,8 @@
-<template>
-    <div class="login-form">
-        <h2>Login</h2>
-        <form @submit.prevent="onSubmit">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" v-model="username" required aria-label="Enter your username" />
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" v-model="password" required aria-label="Enter your password" />
-            </div>
-
-            <div class="form-group">
-                <button type="submit">Login</button>
-            </div>
-
-            <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-        </form>
-    </div>
-</template>
-
 <script setup>
 import { inject, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-const { login } = inject('auth');
+const { handleLogin } = inject('auth');
 const router = useRouter();
 
 const username = ref('');
@@ -50,7 +27,7 @@ const onSubmit = async () => {
     }
 
     try {
-        await login(username.value, password.value);
+        await handleLogin(username.value, password.value);
         alert('Login successful!');
         router.push('/');
     } catch (error) {
@@ -58,6 +35,30 @@ const onSubmit = async () => {
     }
 };
 </script>
+
+<template>
+    <div class="login-form">
+        <h2>Login</h2>
+        <form @submit.prevent="onSubmit">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" v-model="username" required aria-label="Enter your username" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" v-model="password" required aria-label="Enter your password" />
+            </div>
+
+            <div class="form-group">
+                <button type="submit">Login</button>
+            </div>
+
+            <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+        </form>
+    </div>
+</template>
+
 
 <style scoped>
 .login-form {

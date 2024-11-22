@@ -1,52 +1,72 @@
 import { ref, computed } from 'vue';
-import authService from '../services/authService';
-import { useLocalPersistence } from './useLocalPersistence'; 
+import { login, logout, getUser } from '../services/authservice';
+import { getCsrfToken } from '../services/useAPIData';
+
+const user = ref(null);
+const error = ref(null);
+const isLoading = ref(false);
+const csrfToken = ref(null);
+
+async function handleLogin(username, password) {
+  isLoading.value = true;
+  error.value = null;
+
+  try {
+      csrfToken.value = await getCsrfToken();
+
+      const userData = await login(username, password,csrfToken.value);
+      user.value = userData;
+  } catch (err) {
+      console.error('Login failed:', err);
+      error.value = 'Login failed. Please check your credentials.';
+  } finally {
+      isLoading.value = false;
+  }
+}
+
+async function handleLogout() {
+  isLoading.value = true;
+  error.value = null;
+
+  try {
+      await logout(csrfToken.value);
+      user.value = null;
+      csrfToken.value = null;
+  } catch (err) {
+      console.error('Logout failed:', err);
+      error.value = 'Logout failed. Please try again.';
+  } finally {
+      isLoading.value = false;
+  }
+}
+async function fetchUser() {
+  isLoading.value = true;
+  error.value = null;
+
+  try {
+      const userData = await getUser();
+      user.value = userData;
+
+      if (userData) {
+          csrfToken.value = await getCsrfToken();
+      }
+  } catch (err) {
+      console.error('Fetching user failed:', err);
+      user.value = null;
+      csrfToken.value = null; 
+  } finally {
+      isLoading.value = false;
+  }
+}
 
 export function useAuth() {
-  const { getItem, setItem, removeItem } = useLocalPersistence('authUser');
-
-  const user = ref(getItem() || null);
-
-  const isAuthenticated = computed(() => !!user.value);
-
-  const login = async (username, password) => {
-    try {
-      const response = await authService.login(username, password);
-      user.value = response.user;
-      setItem(response.user);
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw new Error('Login failed');
-    }
-  };
-
-  const logout = async () => {
-    try {
-      await authService.logout();
-      user.value = null;
-      removeItem();
-    } catch (error) {
-      console.error('Logout failed:', error);
-      throw new Error('Logout failed');
-    }
-  };
-
-  const fetchUser = async () => {
-    try {
-      const response = await authService.fetchUser();
-      user.value = response.user;
-      setItem(response.user);
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
-      user.value = null;
-      removeItem();
-    }
-  };
-  return {
-    user,
-    isAuthenticated,
-    login,
-    logout,
-    fetchUser,
-  };
+    return {
+        user,
+        csrfToken,
+        error,
+        isLoading,
+        handleLogin,
+        handleLogout,
+        fetchUser,
+    };
 }
